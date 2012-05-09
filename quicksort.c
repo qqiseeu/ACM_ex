@@ -1,9 +1,11 @@
 #include <stdio.h>
+#define CUTOFF	10
 
 void			QuickSort(int A[], int N);
 static void		QSort(int A[], int Left, int Right);
-static void		Median3(int A[], int Left, int Right);	//Calculate the pivot
-static void		InsertSort(int A[], int Left, int Right);
+static int		Median3(int A[], int Left, int Right);	//Calculate the pivot
+static void		InsertionSort(int A[], int Left, int Right);
+static void		Swap(int *a, int *b);
 
 int main(void)
 {
@@ -13,7 +15,7 @@ int main(void)
 	QuickSort(A, 12);
 
 	for (i=0; i<12; i++)
-		printf("%-4d\n", A[i]);
+		printf("%-4d", A[i]);
 	putchar('\n');
 
 	return 0;
@@ -26,26 +28,55 @@ void QuickSort(int A[], int N)
 
 static void		QSort(int A[], int Left, int Right)
 {
-	
+	int i, j, Pivot;
+
+	if (Left+CUTOFF < Right)
+		{
+			Pivot = Median3(A, Left, Right);
+			i	  = Left;
+			j	  = Right - 1;
+
+			for (;;)
+				{
+					while (A[++i] < Pivot)
+						;
+					while (A[--j] > Pivot)
+						;
+
+					if (i < j)
+						Swap(&A[i], &A[j]);
+					else
+						break;
+				}
+			Swap(&A[i], &A[Right-1]);
+
+			QSort(A, Left, i-1);
+			QSort(A, i+1, Right);
+		}
+	else
+		InsertionSort(A, Left, Right);
 }
 
 static int		Median3(int A[], int Left, int Right)
 {
-	int Median = A[(Left+Right)/2];
+	int Center = (Left+Right)/2;
 
-	if (Median > A[Left])
-		Median = A[Left];
-	if (Median > A[Right])
-		Median = A[Right];
+	if (A[Center] < A[Left])
+		Swap(&A[Center], &A[Left]);
+	if (A[Right] < A[Left])
+		Swap(&A[Right], &A[Left]);
+	if (A[Center] > A[Right])
+		Swap(&A[Center],&A[Right]);
 
-	return Median;
+	Swap(&A[Center], &A[Right-1]);
+   	return A[Right-1];
 }
 
-static void		InsertSort(int A[], int Left, int Right)
+static void		InsertionSort(int A[], int Left, int Right)
 {
 	int i, j, tmp;
 
-	for (i=Left+1; i<Right; i++)
+	for (i=Left+1; i<=Right; i++)
 		{
 			tmp = A[i];
 			
@@ -55,4 +86,11 @@ static void		InsertSort(int A[], int Left, int Right)
 		}
 }
 
-		
+static void Swap(int *a, int *b)
+{
+	int temp;
+
+	temp = *a;
+	*a	 = *b;
+	*b	 = temp;
+}
